@@ -5,6 +5,7 @@ import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Interface.Pure.Simulate
 import Graphics.Gloss.Interface.Pure.Display
 import System.Random
+import System.Exit
 
 
 type CoordinateList	= [Point]
@@ -14,7 +15,7 @@ data Area   = Area  CoordinateList
 data Snake  = Snake CoordinateList Direction
 data Apple  = Apple Point
 
-data Game   = Started Area Snake Apple | Ended
+data Game   = Started Area Snake Apple | Ended | Exit
 
 
 -- initial game state
@@ -71,24 +72,25 @@ drawGame (Started ga (Snake parts direction) (Apple (ax,ay))) = pictures [snakel
 -- keypress handling
 handleEvents :: Event -> Game -> Game
 handleEvents (EventKey (SpecialKey KeySpace) Down _ _) Ended = initGame
+handleEvents (EventKey (SpecialKey KeyEsc) Down _ _) Ended = Exit
 handleEvents (EventKey button Down _ _)
-					(Started ga (Snake snakeparts direction) apple)
-					= Started ga (Snake snakeparts direction') apple
-					where
-						direction'
-							| button == SpecialKey KeyRight && snd direction /= 0 = (20,0)
-							| button == SpecialKey KeyLeft && snd direction /= 0 = (-20,0)
-							| button == SpecialKey KeyUp && fst direction /= 0 = (0,20)
-							| button == SpecialKey KeyDown && fst direction /= 0 = (0,-20)
-							| otherwise = direction
+	(Started ga (Snake snakeparts direction) apple)
+	= Started ga (Snake snakeparts direction') apple
+		where
+		direction'
+			| button == SpecialKey KeyRight && snd direction /= 0 = (20,0)
+			| button == SpecialKey KeyLeft && snd direction /= 0 = (-20,0)
+			| button == SpecialKey KeyUp && fst direction /= 0 = (0,20)
+			| button == SpecialKey KeyDown && fst direction /= 0 = (0,-20)
+			| otherwise = direction
 handleEvents _ boring = boring -- other than the specfied keypresses do not affect the game
 
 
 main = 	play
-		(InWindow "LambdaSnake" (560, 600) (20, 20))
-		black
-		24
-		initGame
-		drawGame
-		handleEvents
-		doAction
+	(InWindow "LambdaSnake" (560, 600) (20, 20))
+	black
+	24
+	initGame
+	drawGame
+	handleEvents
+	doAction
